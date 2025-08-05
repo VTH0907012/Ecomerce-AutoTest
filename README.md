@@ -84,8 +84,7 @@ Sau khi chạy test, bạn có thể xem báo cáo tại:
 ## 🧑‍💻 Author
 
 **Võ Thanh Hiếu**  
-📧 Contact: [Your email or GitHub profile link]
-
+📧 Contact: thanhhieu@gmail.com
 ---
 
 ## 📄 License
