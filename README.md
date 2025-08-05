@@ -2,6 +2,10 @@
 
 This repository contains an automated end-to-end testing suite for an e-commerce website using **Java**, **Selenium WebDriver**, **TestNG**, and **ExtentReports**.
 
+👉 **Live Website Under Test:**  
+🔗 [https://vercel.com/thanh-hieus-projects/ecommerce-electronics](https://vercel.com/thanh-hieus-projects/ecommerce-electronics)
+
+---
 
 ## 🧪 Tech Stack
 
@@ -21,8 +25,8 @@ This repository contains an automated end-to-end testing suite for an e-commerce
 - ✅ End-to-end checkout flow test
 - ✅ ExtentReports for beautiful HTML reports
 - ✅ Data-driven testing support via Excel (Apache POI)
-- ✅ Screenshots on test failure *(in progress)*
-- ✅ Logs with SLF4J *(in progress)*
+- 🛠️ Screenshots on test failure *(in progress)*
+- 🛠️ Logs with SLF4J *(in progress)*
 
 ## 🚀 How to Run
 
@@ -36,18 +40,3 @@ This repository contains an automated end-to-end testing suite for an e-commerce
 ### Run all tests
 ```bash
 mvn clean test
-```
-
-### Run specific suite
-Update and use `testng.xml` to specify which test classes to run.
-
-### Report Location
-After running tests, find your ExtentReport at:
-```
-/test-output/ExtentReport.html
-```
-
-## 📸 Sample Reports
-
-*(Add your ExtentReport screenshot here if available)*
-
