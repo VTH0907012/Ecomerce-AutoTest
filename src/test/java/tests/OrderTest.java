@@ -35,7 +35,7 @@ public class OrderTest extends BaseTest {
     public void loginAndNavigateToOrderPage() throws InterruptedException {
         super.setUp();
         LoginPage loginPage = new LoginPage(driver);
-        CheckoutPage checkoutPage = loginPage.login("thanhhieu@gmail.com", "123456");
+        CheckoutPage checkoutPage = loginPage.login("thanhhieu@gmail.com", "0914549857L");
         Assert.assertTrue(checkoutPage.isCheckoutPageDisplayed());
 
         DashboardPage dashboardPage = checkoutPage.navAdmimPage();
@@ -47,23 +47,38 @@ public class OrderTest extends BaseTest {
 
     @Test(dataProvider = "orderChangeStatusData", priority = 1)
     public void testChangeStatusOrder(String idOrder, String status, String expectedResult) throws InterruptedException {
-        orderPage.clearSearchInput(); // làm sạch input trước mỗi lần test
-        boolean isOrderFound = orderPage.searchOrder(idOrder);
+        test.info("testChangeStatusOrder - Mã đơn " + idOrder + " [" + expectedResult + "]");
+        try {
+            test.info(" Tìm kiếm đơn hàng với mã: " + "#" + idOrder);
+            orderPage.clearSearchInput(); // làm sạch input trước mỗi lần test
+            boolean isOrderFound = orderPage.searchOrder(idOrder);
 
-        switch (expectedResult) {
-            case "success":
-                Assert.assertTrue(isOrderFound, "Không tìm thấy đơn hàng cần thay đổi.");
-                orderPage.editStatusOrder(idOrder, status);
-                Assert.assertTrue(orderPage.checkStatus(idOrder, status), "Trạng thái chưa được cập nhật.");
-                break;
 
-            case "not_found":
-                Assert.assertFalse(isOrderFound, "Đơn hàng không nên tồn tại nhưng vẫn tìm thấy.");
-                //Assert.assertTrue(orderPage.isOrderNotFoundDisplayed(), "Không hiển thị thông báo đơn hàng không tồn tại.");
-                break;
+            switch (expectedResult) {
+                case "success":
+                    test.info(" Kỳ vọng tìm thấy đơn hàng và thay đổi trạng thái thành: " + status);
+                    Assert.assertTrue(isOrderFound, "Không tìm thấy đơn hàng cần thay đổi.");
+                    test.info(" Tiến hành đổi trạng thái đơn hàng...");
+                    orderPage.editStatusOrder("#" + idOrder, status);
 
-            default:
-                Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+                    boolean statusUpdated = orderPage.checkStatus(idOrder, status);
+                    Assert.assertTrue(statusUpdated, "Trạng thái chưa được cập nhật.");
+                    test.pass(" Đổi trạng thái đơn hàng thành công.");
+                    break;
+
+                case "not_found":
+                    test.info(" Kỳ vọng KHÔNG tìm thấy đơn hàng.");
+                    Assert.assertFalse(isOrderFound, "Đơn hàng không nên tồn tại nhưng vẫn tìm thấy.");
+                    test.pass(" Không tìm thấy đơn hàng, đúng như mong đợi.");
+                    break;
+
+                default:
+                    test.fail(" Giá trị expectedResult không hợp lệ: " + expectedResult);
+                    Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+            }
+        } catch (AssertionError e) {
+            test.fail(" Test thất bại: " + e.getMessage());
+            throw e;
         }
     }
 }

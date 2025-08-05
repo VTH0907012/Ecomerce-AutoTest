@@ -1,8 +1,12 @@
 package pages.Client;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import utils.BasePage;
+
+import java.util.List;
 
 public class ProfilePage extends BasePage {
     public ProfilePage(WebDriver driver) {
@@ -21,8 +25,8 @@ public class ProfilePage extends BasePage {
 
     }
 
-    By inputName = By.cssSelector("input[value='testname']");
-    By inputEmail = By.cssSelector("input[value='test@gmail.com']");
+    By inputName = By.xpath("//input[@name='name']");
+    By inputEmail = By.xpath("//input[@name='email']");
     By btnSaveChange = By.xpath("//button[contains(text(),'Lưu thay đổi')]");
 
     public void changeInfo(String name, String email) throws InterruptedException {
@@ -30,11 +34,14 @@ public class ProfilePage extends BasePage {
         Thread.sleep(1000);
 
         if (name != null) {
-            sendKeys(inputName, name);
+
+            sendKeys(inputName, name.isEmpty() ? Keys.SPACE + "" + Keys.BACK_SPACE : name);
+            //sendKeys(inputName, name);
         }
         Thread.sleep(1000);
         if (email != null) {
-            sendKeys(inputEmail, email);
+            sendKeys(inputEmail, email.isEmpty() ? Keys.SPACE + "" + Keys.BACK_SPACE : email);
+            //sendKeys(inputEmail, email);
         }
         Thread.sleep(1000);
 
@@ -44,11 +51,10 @@ public class ProfilePage extends BasePage {
 
     public Boolean checkInfo(String name, String email) throws InterruptedException {
 
-        String name_curent = getText(inputName);
+        String name_curent = getValue(inputName);
         Thread.sleep(1000);
-        String email_curent = getText(inputEmail);
+        String email_curent = getValue(inputEmail);
         Thread.sleep(1000);
-
         if (name_curent.equals(name) && email_curent.equals(email)) {
             return true;
         }
@@ -91,8 +97,14 @@ public class ProfilePage extends BasePage {
 
     By optionOrderHistory = By.xpath("//button[contains(text(),'Lịch sử đơn hàng')]");
     By btnConfirmCancel = By.xpath("//button[normalize-space()='Xoá']");
-    public void cancelOrder(String codeOder) throws InterruptedException {
+
+    public void navigateToHistoryOrder() throws InterruptedException {
+
         click(optionOrderHistory);
+    }
+
+    public void cancelOrder(String codeOder) throws InterruptedException {
+        //click(optionOrderHistory);
 
         Thread.sleep(1000);
         By btnCancel = By.xpath("//tr[td[contains(text(), '" + codeOder + "')]]//button[contains(text(),'Hủy đơn')]");
@@ -107,6 +119,43 @@ public class ProfilePage extends BasePage {
         By statusOrder = By.xpath("//tr[td[contains(text(), '" + codeOrder + "')]]/td[3]");
         Thread.sleep(1000);
         return getText(statusOrder);
+    }
+
+
+    public boolean isNameErrorDisplayed() {
+        return isDisplayed(By.xpath("//p[contains(text(), 'Họ tên không được để trống')]"));
+    }
+
+    public boolean isEmailErrorDisplayed() {
+        return isDisplayed(By.xpath("//p[contains(text(),'Email không được để trống')]"));
+    }
+
+    public boolean isEmailInvalidDisplayed() {
+        return isDisplayed(By.xpath("//p[contains(text(),'Email không hợp lệ')]"));
+    }
+
+
+    public boolean isMissingCurrentPasswordMessageDisplayed() {
+        return isDisplayed(By.xpath("//p[contains(text(),'Vui lòng nhập mật khẩu hiện tại')]"));
+    }
+
+    public boolean isMissingNewPasswordMessageDisplayed() {
+        return isDisplayed(By.xpath("//p[contains(text(),'Vui lòng nhập mật khẩu mới')]"));
+    }
+
+    public boolean isIncorrectPasswordMessageDisplayed() {
+        return isDisplayed(By.xpath("//div[@class='go2072408551']"));
+    }
+
+    By btnCancel = By.xpath("//button[contains(text(),'Huỷ')]");
+
+    public void closeModal() {
+        click(btnCancel);
+    }
+
+    public boolean searchOrder(String idOrder) {
+        By order = By.xpath("//td[normalize-space()='" + idOrder + "']");
+        return isDisplayed(order);
     }
 
 }

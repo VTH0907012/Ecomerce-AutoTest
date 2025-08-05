@@ -48,7 +48,7 @@ public class ProductTest extends BaseTest {
         super.setUp(); // setup driver
 
         LoginPage loginPage = new LoginPage(driver);
-        CheckoutPage checkoutPage = loginPage.login("thanhhieu@gmail.com", "123456");
+        CheckoutPage checkoutPage = loginPage.login("thanhhieu@gmail.com", "0914549857L");
         Assert.assertTrue(checkoutPage.isCheckoutPageDisplayed());
 
         DashboardPage dashboardPage = checkoutPage.navAdmimPage();
@@ -59,153 +59,140 @@ public class ProductTest extends BaseTest {
     }
 
     @Test(dataProvider = "productAddData", priority = 1)
-    public void testAddProduct(String name, String price, String disprice, String quantity, String category, String brand, String desc, String rating, String imagePath,String expectedResult)  throws InterruptedException{
-        // Parse các giá trị nếu không null/empty
-        Float parsedPrice = (price == null || price.isEmpty()) ? null : Float.parseFloat(price.replace("f", ""));
-        Float parsedDisPrice = (disprice == null || disprice.isEmpty()) ? null : Float.parseFloat(disprice.replace("f", ""));
-        Integer parsedQuantity = (quantity == null || quantity.isEmpty()) ? null : Integer.parseInt(quantity);
-        Float parsedRating = (rating == null || rating.isEmpty()) ? null : Float.parseFloat(rating.replace("f", ""));
+    public void testAddProduct(String name, String price, String disprice, String quantity, String category, String brand, String desc, String rating, String imagePath, String expectedResult) throws InterruptedException {
+        test.info("testAddProduct - " + name + " [" + expectedResult + "]");
+        try {
+            Float parsedPrice = (price == null || price.isEmpty()) ? null : Float.parseFloat(price.replace("f", ""));
+            Float parsedDisPrice = (disprice == null || disprice.isEmpty()) ? null : Float.parseFloat(disprice.replace("f", ""));
+            Integer parsedQuantity = (quantity == null || quantity.isEmpty()) ? null : Integer.parseInt(quantity);
+            Float parsedRating = (rating == null || rating.isEmpty()) ? null : Float.parseFloat(rating.replace("f", ""));
 
+            test.info(" Thêm sản phẩm: " + name);
+            productPage.addProduct(name, parsedPrice, parsedDisPrice, parsedQuantity, category, brand, desc, parsedRating, imagePath);
+            Thread.sleep(1500);
 
-        productPage.addProduct(name, parsedPrice, parsedDisPrice, parsedQuantity, category, brand, desc, parsedRating, imagePath);
-        Thread.sleep(1500);
+            switch (expectedResult) {
+                case "success":
+                    boolean isAdded = productPage.searchProduct(name);
+                    Assert.assertTrue(isAdded, " Product không hiển thị sau khi thêm.");
+                    break;
+                case "missing_name":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_name"), " Không hiển thị lỗi khi thiếu tên.");
+                    productPage.closeModal();
+                    Assert.assertFalse(productPage.searchProduct(name));
+                    break;
+                case "missing_price":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_price"), " Không hiển thị lỗi khi thiếu giá.");
+                    productPage.closeModal();
+                    Assert.assertFalse(productPage.searchProduct(name));
+                    break;
+                case "missing_quantity":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_quantity"), " Không hiển thị lỗi khi thiếu số lượng.");
+                    productPage.closeModal();
+                    Assert.assertFalse(productPage.searchProduct(name));
+                    break;
+                case "missing_category":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_category"), " Không hiển thị lỗi khi thiếu danh mục.");
+                    productPage.closeModal();
+                    Assert.assertFalse(productPage.searchProduct(name));
+                    break;
+                case "missing_brand":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_brand"), " Không hiển thị lỗi khi thiếu nhãn hiệu.");
+                    productPage.closeModal();
+                    Assert.assertFalse(productPage.searchProduct(name));
+                    break;
+                case "missing_images":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_images"), " Không hiển thị lỗi khi thiếu hình ảnh.");
+                    productPage.closeModal();
+                    Assert.assertFalse(productPage.searchProduct(name));
+                    break;
+                default:
+                    Assert.fail(" expectedResult không hợp lệ: " + expectedResult);
+            }
 
-
-        switch (expectedResult) {
-            case "success":
-                boolean isAdded = productPage.searchProduct(name);
-                Assert.assertTrue(isAdded, "Product không hiển thị sau khi thêm.");
-                break;
-            case "missing_name":
-                boolean isNameErrorMissing = productPage.isErrorDisplayed("missing_name");
-                Assert.assertTrue(isNameErrorMissing, "Không hiển thị lỗi khi thiếu tên.");
-                productPage.closeModal();
-                boolean isFoundMissing_MissName =  productPage.searchProduct(name);
-                Assert.assertFalse(isFoundMissing_MissName, "Product không nên được thêm khi thiếu tên.");
-                break;
-
-            case "missing_price":
-                boolean isPriceErrorMissing = productPage.isErrorDisplayed("missing_price");
-                Assert.assertTrue(isPriceErrorMissing, "Không hiển thị lỗi khi thiếu giá.");
-                productPage.closeModal();
-                boolean isFoundMissing_MissPrice =  productPage.searchProduct(name);
-                Assert.assertFalse(isFoundMissing_MissPrice, "Product không nên được thêm khi thiếu giá.");
-                break;
-            case "missing_quantity":
-                boolean isQuantityErrorMissing = productPage.isErrorDisplayed("missing_quantity");
-                Assert.assertTrue(isQuantityErrorMissing, "Không hiển thị lỗi khi thiếu số lượng.");
-                productPage.closeModal();
-                boolean isFoundMissing_MissQuantity =  productPage.searchProduct(name);
-                Assert.assertFalse(isFoundMissing_MissQuantity, "Product không nên được thêm khi thiếu số lượng.");
-                break;
-            case "missing_category":
-                boolean isCategoryErrorMissing = productPage.isErrorDisplayed("missing_category");
-                Assert.assertTrue(isCategoryErrorMissing, "Không hiển thị lỗi khi thiếu danh mục.");
-                productPage.closeModal();
-                boolean isFoundMissing_MissCategory =  productPage.searchProduct(name);
-                Assert.assertFalse(isFoundMissing_MissCategory, "Product không nên được thêm khi thiếu danh mục.");
-                break;
-            case "missing_brand":
-                boolean isBrandErrorMissing = productPage.isErrorDisplayed("missing_brand");
-                Assert.assertTrue(isBrandErrorMissing, "Không hiển thị lỗi khi thiếu nhãn hiệu.");
-                productPage.closeModal();
-                boolean isFoundMissing_MissBrand =  productPage.searchProduct(name);
-                Assert.assertFalse(isFoundMissing_MissBrand, "Product không nên được thêm khi thiếu nhãn hiệu.");
-                break;
-            case "missing_images":
-                boolean isImageErrorMissing = productPage.isErrorDisplayed("missing_images");
-                Assert.assertTrue(isImageErrorMissing, "Không hiển thị lỗi khi thiếu hình ảnh.");
-                productPage.closeModal();
-                boolean isFoundMissing_MissImages =  productPage.searchProduct(name);
-                Assert.assertFalse(isFoundMissing_MissImages, "Product không nên được thêm khi thiếu hình ảnh.");
-                break;
-            default:
-                Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+        } catch (Exception | AssertionError e) {
+            test.fail(" Test thất bại: " + e.getMessage());
+            throw e;
         }
     }
-
     @Test(dataProvider = "productEditData", priority = 2)
-    public void testEditProduct(String name, String price, String disprice, String quantity, String category, String brand, String desc, String rating, String imagePath,String name_edit,String expectedResult)  throws InterruptedException{
-        // Parse các giá trị nếu không null/empty
-        Float parsedPrice = (price == null || price.isEmpty()) ? null : Float.parseFloat(price.replace("f", ""));
-        Float parsedDisPrice = (disprice == null || disprice.isEmpty()) ? null : Float.parseFloat(disprice.replace("f", ""));
-        Integer parsedQuantity = (quantity == null || quantity.isEmpty()) ? null : Integer.parseInt(quantity);
-        Float parsedRating = (rating == null || rating.isEmpty()) ? null : Float.parseFloat(rating.replace("f", ""));
+    public void testEditProduct(String name, String price, String disprice, String quantity, String category, String brand, String desc, String rating, String imagePath, String name_edit, String expectedResult) throws InterruptedException {
+        test.info("testEditProduct - " + name + " → " + name_edit + " [" + expectedResult + "]");
+        try {
+            Float parsedPrice = (price == null || price.isEmpty()) ? null : Float.parseFloat(price.replace("f", ""));
+            Float parsedDisPrice = (disprice == null || disprice.isEmpty()) ? null : Float.parseFloat(disprice.replace("f", ""));
+            Integer parsedQuantity = (quantity == null || quantity.isEmpty()) ? null : Integer.parseInt(quantity);
+            Float parsedRating = (rating == null || rating.isEmpty()) ? null : Float.parseFloat(rating.replace("f", ""));
 
-        productPage.searchProduct("testname");
-        productPage.editProduct(name, parsedPrice, parsedDisPrice, parsedQuantity, category, brand, desc, parsedRating, imagePath,name_edit);
-        Thread.sleep(1500);
+            productPage.searchProduct("testname");
+            productPage.editProduct(name, parsedPrice, parsedDisPrice, parsedQuantity, category, brand, desc, parsedRating, imagePath, name_edit);
+            Thread.sleep(1500);
 
+            switch (expectedResult) {
+                case "success":
+                    Assert.assertTrue(productPage.searchProduct(name), " Product không hiển thị sau khi sửa.");
+                    break;
+                case "missing_name":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_name"), " Không hiển thị lỗi khi thiếu tên.");
+                    productPage.closeModal();
+                    break;
+                case "missing_price":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_price"), " Không hiển thị lỗi khi thiếu giá.");
+                    productPage.closeModal();
+                    break;
+                case "missing_quantity":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_quantity"), " Không hiển thị lỗi khi thiếu số lượng.");
+                    productPage.closeModal();
+                    break;
+                case "missing_category":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_category"), " Không hiển thị lỗi khi thiếu danh mục.");
+                    productPage.closeModal();
+                    break;
+                case "missing_brand":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_brand"), " Không hiển thị lỗi khi thiếu nhãn hiệu.");
+                    productPage.closeModal();
+                    break;
+                case "missing_images":
+                    Assert.assertTrue(productPage.isErrorDisplayed("missing_images"), " Không hiển thị lỗi khi thiếu hình ảnh.");
+                    productPage.closeModal();
+                    break;
+                default:
+                    Assert.fail(" expectedResult không hợp lệ: " + expectedResult);
+            }
 
-        switch (expectedResult) {
-            case "success":
-                boolean isAdded = productPage.searchProduct(name);
-                Assert.assertTrue(isAdded, "Product không hiển thị sau khi thêm.");
-                break;
-            case "missing_name":
-                boolean isNameErrorMissing = productPage.isErrorDisplayed("missing_name");
-                Assert.assertTrue(isNameErrorMissing, "Không hiển thị lỗi khi thiếu tên.");
-                productPage.closeModal();
-
-                break;
-
-            case "missing_price":
-                boolean isPriceErrorMissing = productPage.isErrorDisplayed("missing_price");
-                Assert.assertTrue(isPriceErrorMissing, "Không hiển thị lỗi khi thiếu giá.");
-                productPage.closeModal();
-
-                break;
-            case "missing_quantity":
-                boolean isQuantityErrorMissing = productPage.isErrorDisplayed("missing_quantity");
-                Assert.assertTrue(isQuantityErrorMissing, "Không hiển thị lỗi khi thiếu số lượng.");
-                productPage.closeModal();
-                break;
-            case "missing_category":
-                boolean isCategoryErrorMissing = productPage.isErrorDisplayed("missing_category");
-                Assert.assertTrue(isCategoryErrorMissing, "Không hiển thị lỗi khi thiếu danh mục.");
-                productPage.closeModal();
-
-                break;
-            case "missing_brand":
-                boolean isBrandErrorMissing = productPage.isErrorDisplayed("missing_brand");
-                Assert.assertTrue(isBrandErrorMissing, "Không hiển thị lỗi khi thiếu nhãn hiệu.");
-                productPage.closeModal();
-
-                break;
-            case "missing_images":
-                boolean isImageErrorMissing = productPage.isErrorDisplayed("missing_images");
-                Assert.assertTrue(isImageErrorMissing, "Không hiển thị lỗi khi thiếu hình ảnh.");
-                productPage.closeModal();
-
-                break;
-            default:
-                Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+        } catch (Exception | AssertionError e) {
+            test.fail(" Test thất bại: " + e.getMessage());
+            throw e;
         }
     }
-
     @Test(dataProvider = "productDeleteData", priority = 3)
     public void testDeleteProduct(String name, String expectedResult) throws InterruptedException {
-        boolean productExistsBeforeDelete = productPage.searchProduct(name);
-        Thread.sleep(1000);
-        // Nếu category tồn tại thì tiến hành xoá
-        if (productExistsBeforeDelete) {
-            productPage.deteleProduct(name);
+        test.info("testDeleteProduct - " + name + " [" + expectedResult + "]");
+        try {
+            boolean productExistsBeforeDelete = productPage.searchProduct(name);
             Thread.sleep(1000);
-        }
-        boolean productStillExists = productPage.searchProduct(name);
-        switch (expectedResult) {
-            case "success":
-                Assert.assertFalse(productStillExists, "Category vẫn còn sau khi xoá.");
-                break;
-            case "not_found":
-                Assert.assertFalse(productExistsBeforeDelete, "Category tồn tại dù expectedResult là not_found.");
-                break;
-            default:
-                Assert.fail("Giá trị expectedResult không hợp lệ: " + expectedResult);
+            if (productExistsBeforeDelete) {
+                productPage.deteleProduct(name);
+                Thread.sleep(1000);
+            }
+
+            boolean productStillExists = productPage.searchProduct(name);
+            switch (expectedResult) {
+                case "success":
+                    Assert.assertFalse(productStillExists, " Product vẫn còn sau khi xoá.");
+                    break;
+                case "not_found":
+                    Assert.assertFalse(productExistsBeforeDelete, " Product tồn tại dù expectedResult là not_found.");
+                    break;
+                default:
+                    Assert.fail(" expectedResult không hợp lệ: " + expectedResult);
+            }
+
+        } catch (Exception | AssertionError e) {
+            test.fail(" Test thất bại: " + e.getMessage());
+            throw e;
         }
     }
-
-
 //    @Test(priority = 1)
 //    public void testAddProduct() throws InterruptedException{
 //        productPage.addProduct("testname", 100000f,50000f, 40, "Tivi","Sony","testdesc",4f,"C:\\Users\\thanh\\Downloads\\img_ip14-plus\\iphone-14-plus-tim-1.jpg");

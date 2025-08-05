@@ -58,32 +58,36 @@ public class LoginTest extends BaseTest {
 //    }
 
     @Test(dataProvider = "loginData")
-    public void loginTest(String testCaseId, String email, String password, String expectedResult) throws InterruptedException {
-        test.info(" Test Case Id: " + testCaseId);
-        test.info(" Đăng nhập với: " + email + " / " + password);
+    public void loginTest(String email, String password, String expectedResult) throws InterruptedException {
+        test.info("Test Đăng nhập với: " + email + " / " + password);
+        try {
+            loginPage = new LoginPage(driver);
+            CheckoutPage checkoutPage = loginPage.login(email, password);
+            expectedResult = expectedResult.toLowerCase();
 
-        loginPage = new LoginPage(driver);
-        CheckoutPage checkoutPage = loginPage.login(email, password);
-        expectedResult = expectedResult.toLowerCase();
+            switch (expectedResult) {
+                case "success":
+                    test.info(" Kỳ vọng: đăng nhập thành công và chuyển đến trang thanh toán");
+                    Assert.assertTrue(checkoutPage.isCheckoutPageDisplayed(), " Không hiển thị trang thanh toán!");
+                    test.pass(" Đăng nhập thành công, đã vào trang thanh toán");
+                    checkoutPage.logout();
+                    break;
 
-        switch (expectedResult) {
-            case "success":
-                test.info(" Kỳ vọng: đăng nhập thành công và chuyển đến trang thanh toán");
-                Assert.assertTrue(checkoutPage.isCheckoutPageDisplayed(), " Không hiển thị trang thanh toán!");
-                test.pass(" Đăng nhập thành công, đã vào trang thanh toán");
-                checkoutPage.logout();
-                break;
+                case "missing_email":
+                case "invalid_password":
+                    test.info(" Kỳ vọng: hiển thị thông báo lỗi vì " + expectedResult);
+                    Assert.assertTrue(loginPage.isErrorDisplayed(), " Không hiển thị thông báo lỗi");
+                    test.pass(" Hiển thị thông báo lỗi đúng như kỳ vọng");
+                    break;
 
-            case "missing_email":
-            case "invalid_password":
-                test.info(" Kỳ vọng: hiển thị thông báo lỗi vì " + expectedResult);
-                Assert.assertTrue(loginPage.isErrorDisplayed(), " Không hiển thị thông báo lỗi");
-                test.pass(" Hiển thị thông báo lỗi đúng như kỳ vọng");
-                break;
-
-            default:
-                test.fail(" Giá trị expectedResult không hợp lệ: " + expectedResult);
-                Assert.fail("ExpectedResult không hợp lệ: " + expectedResult);
+                default:
+                    test.fail(" Giá trị expectedResult không hợp lệ: " + expectedResult);
+                    Assert.fail("ExpectedResult không hợp lệ: " + expectedResult);
+            }
+        } catch (Exception | AssertionError e) {
+            test.fail(e.getMessage());
+            throw e;
         }
+
     }
 }

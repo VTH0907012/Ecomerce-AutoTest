@@ -29,6 +29,7 @@ public class CategoryTest extends BaseTest {
     public Object[][] getCategoryEditData() {
         return getDataFromSheet("CategoryEdit");
     }
+
     @DataProvider(name = "categoryDeleteData")
     public Object[][] getCategoryDeleteData() {
         return getDataFromSheet("CategoryDelete");
@@ -49,7 +50,7 @@ public class CategoryTest extends BaseTest {
         super.setUp(); // setup driver
 
         LoginPage loginPage = new LoginPage(driver);
-        CheckoutPage checkoutPage = loginPage.login("thanhhieu@gmail.com", "123456");
+        CheckoutPage checkoutPage = loginPage.login("thanhhieu@gmail.com", "0914549857L");
         Assert.assertTrue(checkoutPage.isCheckoutPageDisplayed());
 
         DashboardPage dashboardPage = checkoutPage.navAdmimPage();
@@ -61,92 +62,118 @@ public class CategoryTest extends BaseTest {
 
     @Test(dataProvider = "categoryAddData", priority = 1)
     public void testAddCate(String name, String desc, String imagePath, String expectedResult) throws InterruptedException {
-        categoryPage.addCategory(name, desc, imagePath);
-        Thread.sleep(1000);
+        test.info("testAddCate - " + name + " [" + expectedResult + "]");
+        try {
+            categoryPage.addCategory(name, desc, imagePath);
+            Thread.sleep(1000);
 
-        switch (expectedResult) {
-            case "success":
-                boolean isAdded = categoryPage.searchCategory(name);
-                Assert.assertTrue(isAdded, "Category không hiển thị sau khi thêm.");
-                break;
+            switch (expectedResult) {
+                case "success":
+                    boolean isAdded = categoryPage.searchCategory(name);
+                    Assert.assertTrue(isAdded, "Category không hiển thị sau khi thêm.");
+                    test.pass("Category đã được thêm thành công.");
+                    break;
 
-            case "missing_name":
-                boolean isNameErrorMissing = categoryPage.isErrorNameDisplayed();
-                Assert.assertTrue(isNameErrorMissing, "Không hiển thị lỗi khi thiếu tên.");
-                categoryPage.closeModal();
-                boolean isFoundMissing = categoryPage.searchCategory(name);
-                Assert.assertFalse(isFoundMissing, "Category không nên được thêm khi thiếu tên.");
-                break;
+                case "missing_name":
+                    boolean isNameErrorMissing = categoryPage.isErrorNameDisplayed();
+                    Assert.assertTrue(isNameErrorMissing, "Không hiển thị lỗi khi thiếu tên.");
+                    categoryPage.closeModal();
+                    boolean isFoundMissing = categoryPage.searchCategory(name);
+                    Assert.assertFalse(isFoundMissing, "Category không nên được thêm khi thiếu tên.");
+                    test.pass("Hiển thị lỗi khi thiếu tên.");
+                    break;
 
-            case "existing_name":
-                boolean isNameErrorDuplicate = categoryPage.isErrorNameDisplayed();
-                Assert.assertTrue(isNameErrorDuplicate, "Không hiển thị lỗi khi trùng tên.");
-                categoryPage.closeModal();
-                boolean isFoundDuplicate = categoryPage.searchCategory(name);
-                Assert.assertTrue(isFoundDuplicate, "Category trùng tên không nên được thêm mới (vẫn chỉ nên có 1 bản).");
-                break;
+                case "existing_name":
+                    boolean isNameErrorDuplicate = categoryPage.isErrorNameDisplayed();
+                    Assert.assertTrue(isNameErrorDuplicate, "Không hiển thị lỗi khi trùng tên.");
+                    categoryPage.closeModal();
+                    boolean isFoundDuplicate = categoryPage.searchCategory(name);
+                    Assert.assertTrue(isFoundDuplicate, "Category trùng tên không nên được thêm mới.");
+                    test.pass("Không thêm mới khi tên đã tồn tại.");
+                    break;
 
-            default:
-                Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+                default:
+                    Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+            }
+        } catch (Exception | AssertionError e) {
+            test.fail(e.getMessage());
+            throw e;
         }
     }
 
     @Test(dataProvider = "categoryEditData", priority = 2)
     public void testEditCate(String oldName, String desc, String imagePath, String newName, String expectedResult) throws InterruptedException {
-        // B1: Tìm danh mục cần sửa
-        categoryPage.searchCategory(oldName);
+        test.info("testEditCate - Sửa " + oldName + " thành " + newName + " [" + expectedResult + "]");
 
-        // B2: Thực hiện sửa danh mục với dữ liệu được truyền vào
-        categoryPage.editCategory(newName, desc, imagePath, oldName);
+        try {
+            categoryPage.searchCategory(oldName);
+            categoryPage.editCategory(newName, desc, imagePath, oldName);
+            Thread.sleep(1000);
 
-        Thread.sleep(1000);
+            switch (expectedResult) {
+                case "success":
+                    boolean found = categoryPage.searchCategory(newName);
+                    Assert.assertTrue(found, "Category không hiển thị sau khi sửa.");
+                    test.pass("Sửa category thành công.");
+                    break;
 
-        switch (expectedResult) {
-            case "success":
-                boolean found = categoryPage.searchCategory(newName);
-                Assert.assertTrue(found, "Category không hiển thị sau khi sửa.");
-                break;
+                case "missing_name":
+                    categoryPage.closeModal();
+                    Assert.assertTrue(categoryPage.isErrorNameDisplayed(), "Không hiển thị lỗi khi thiếu tên mới.");
+                    test.pass("Hiển thị lỗi khi thiếu tên mới.");
+                    break;
 
-            case "missing_name":
-                categoryPage.closeModal(); // Giả sử bạn có nút đóng form modal
-                Assert.assertTrue(categoryPage.isErrorNameDisplayed(), "Không hiển thị lỗi khi thiếu tên mới.");
-                break;
+                case "existing_name":
+                    categoryPage.closeModal();
+                    Assert.assertTrue(categoryPage.isErrorNameDisplayed(), "Không hiển thị lỗi khi tên bị trùng.");
+                    test.pass("Không sửa được khi tên bị trùng.");
+                    break;
 
-            case "existing_name":
-                categoryPage.closeModal();
-                Assert.assertTrue(categoryPage.isErrorNameDisplayed(), "Không hiển thị lỗi khi tên bị trùng.");
-                break;
-
-            default:
-                Assert.fail(" expectedResult không hợp lệ: " + expectedResult);
+                default:
+                    Assert.fail(" expectedResult không hợp lệ: " + expectedResult);
+            }
+        } catch ( Exception | AssertionError e) {
+            test.fail(e.getMessage());
+            throw e;
         }
     }
 
 
     @Test(dataProvider = "categoryDeleteData", priority = 3)
     public void testDeleteCate(String name, String expectedResult) throws InterruptedException {
-        boolean categoryExistsBeforeDelete = categoryPage.searchCategory(name);
-        Thread.sleep(1000);
-
-        // Nếu category tồn tại thì tiến hành xoá
-        if (categoryExistsBeforeDelete) {
-            categoryPage.deteleCategory(name);
+        test.info("testDeleteCate - Xoá " + name + " [" + expectedResult + "]");
+        try {
+            boolean categoryExistsBeforeDelete = categoryPage.searchCategory(name);
             Thread.sleep(1000);
-        }
 
-        boolean categoryStillExists = categoryPage.searchCategory(name);
-        switch (expectedResult) {
-            case "success":
-                Assert.assertFalse(categoryStillExists, "Category vẫn còn sau khi xoá.");
-                break;
-            case "not_found":
-                Assert.assertFalse(categoryExistsBeforeDelete, "Category tồn tại dù expectedResult là not_found.");
-                break;
-            default:
-                Assert.fail("Giá trị expectedResult không hợp lệ: " + expectedResult);
+            if (categoryExistsBeforeDelete) {
+                categoryPage.deteleCategory(name);
+                Thread.sleep(1000);
+            }
+
+            boolean categoryStillExists = categoryPage.searchCategory(name);
+
+
+            switch (expectedResult) {
+                case "success":
+                    Assert.assertFalse(categoryStillExists, "Category vẫn còn sau khi xoá.");
+                    test.pass("Xoá category thành công.");
+                    break;
+                case "not_found":
+                    Assert.assertFalse(categoryExistsBeforeDelete, "Category tồn tại dù expectedResult là not_found.");
+                    test.pass("Không có category để xoá, đúng như mong đợi.");
+                    break;
+                default:
+                    Assert.fail("Giá trị expectedResult không hợp lệ: " + expectedResult);
+            }
+        } catch (Exception | AssertionError e) {
+            test.fail(e.getMessage());
+            throw e;
         }
     }
 
+
+// Test Basic
 //    @Test(priority = 1)
 //    public void testAddCate(String name, String desc, String imagePath) throws InterruptedException {
 //        categoryPage.addCategory(

@@ -54,7 +54,10 @@ public class BasePage {
             return false;
         }
     }
-
+    public String getValue(By locator) {
+        WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+        return element.getAttribute("value");
+    }
     public boolean isEnabled(By locator) {
         try {
             return wait.until(ExpectedConditions.presenceOfElementLocated(locator)).isEnabled();

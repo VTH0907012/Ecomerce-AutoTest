@@ -2,6 +2,7 @@ package pages.Admin;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.testng.Assert;
 import utils.BasePage;
 
@@ -68,17 +69,23 @@ public class UserPage extends BasePage {
             sendKeys(inputSearchUser, name);
             Thread.sleep(1000);
 
-            By blockButton = By.xpath("//tbody/tr[td[normalize-space()='" + name + "']]//button[@title='Khóa']");
-            click(blockButton);
-            Thread.sleep(1000);
+            By locatorBlockButton = By.xpath("//tbody/tr[td[normalize-space()='" + name + "']]//button[@title='Khóa']");
+            boolean btnBlock = driver.findElement(locatorBlockButton).isDisplayed();
+            if (btnBlock) {
+                click(locatorBlockButton);
+                Thread.sleep(1000);
 
-            String xpath = String.format("//tr[td/div[text()='%s']]/td/span[text()='%s']", name, "Đã khóa");
-            By locatorStatusUser = By.xpath(xpath);
-            String statusUser = getText(locatorStatusUser);
+                String xpath = String.format("//tr[td/div[text()='%s']]/td/span[text()='%s']", name, "Đã khóa");
+                By locatorStatusUser = By.xpath(xpath);
+                String statusUser = getText(locatorStatusUser);
 
-            if (statusUser.equals("Đã khóa")) {
-                return true;
+                if (statusUser.equals("Đã khóa")) {
+                    return true;
+                }
+                return false;
+
             }
+
             return false;
         }
         return false;

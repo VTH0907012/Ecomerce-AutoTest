@@ -10,11 +10,13 @@
     <test name="Modules">
         <classes>
             <!--            <class name="tests.LoginTest"/>-->
-                        <class name="tests.CategoryTest"/>
-            <!--            <class name="tests.ProductTest"/>-->
+<!--                        <class name="tests.CategoryTest"/>-->
+<!--                        <class name="tests.ProductTest"/>-->
             <!--            <class name="tests.OrderTest"/>-->
             <!--            <class name="tests.BlogTest"/>-->
-            <!--            <class name="tests.CartTest"></class>-->
+<!--                        <class name="tests.CartTest"></class>-->
+                        <class name="tests.UserTest"/>
+
         </classes>
     </test>
 </suite>

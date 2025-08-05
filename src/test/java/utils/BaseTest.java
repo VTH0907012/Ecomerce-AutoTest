@@ -23,7 +23,7 @@ public class BaseTest {
 //    public void tearDown() {
 //        DriverFactory.quitDriver();
 //    }
-protected WebDriver driver;
+    protected WebDriver driver;
     protected static ExtentReports extent;
     protected static ExtentTest test;
 

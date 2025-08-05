@@ -49,7 +49,7 @@ public class BlogTest extends BaseTest {
         super.setUp(); // setup driver
 
         LoginPage loginPage = new LoginPage(driver);
-        CheckoutPage checkoutPage = loginPage.login("thanhhieu@gmail.com", "123456");
+        CheckoutPage checkoutPage = loginPage.login("thanhhieu@gmail.com", "0914549857L");
         Assert.assertTrue(checkoutPage.isCheckoutPageDisplayed());
 
         DashboardPage dashboardPage = checkoutPage.navAdmimPage();
@@ -58,77 +58,132 @@ public class BlogTest extends BaseTest {
         blogPage = new BlogPage(driver);
     }
 
-
     @Test(dataProvider = "blogAddData", priority = 1)
     public void testAddBlog(String title, String content, String imagePath, String expectedResult) throws InterruptedException {
-        blogPage.addBlog(title, content, imagePath, true);
-        Thread.sleep(1000);
-        switch (expectedResult) {
-            case "success":
-                boolean found = blogPage.searchBlog(title);
-                Assert.assertTrue(found, "Blog không hiển thị sau khi thêm.");
-                break;
-            case "missing_title":
-                boolean titleError = blogPage.isErrorTitleDisplayed();
-                Assert.assertTrue(titleError, "Không hiển thị lỗi khi thiếu tiêu đề.");
-                blogPage.closeModal();
-                break;
-            case "missing_content":
-                boolean contentError = blogPage.isErrorContentDisplayed();
-                Assert.assertTrue(contentError, "Không hiển thị lỗi khi thiếu nội dung.");
-                blogPage.closeModal();
-                break;
-            case "missing_image":
-                boolean imageError = blogPage.isErrorImageDisplayed();
-                Assert.assertTrue(imageError, "Không hiển thị lỗi khi thiếu hình ảnh.");
-                blogPage.closeModal();
-                break;
-            default:
-                Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+        test.info(" Thêm blog với tiêu đề: " + title);
+        try {
+            blogPage.addBlog(title, content, imagePath, true);
+            Thread.sleep(1000);
+
+            switch (expectedResult) {
+                case "success":
+                    boolean found = blogPage.searchBlog(title);
+                    Assert.assertTrue(found, "Blog không hiển thị sau khi thêm.");
+                    test.pass(" Blog đã thêm thành công và hiển thị trong danh sách.");
+                    break;
+
+                case "missing_title":
+                    boolean titleError = blogPage.isErrorTitleDisplayed();
+                    Assert.assertTrue(titleError, "Không hiển thị lỗi khi thiếu tiêu đề.");
+                    test.pass(" Hiển thị lỗi đúng khi thiếu tiêu đề.");
+                    blogPage.closeModal();
+                    break;
+
+                case "missing_content":
+                    boolean contentError = blogPage.isErrorContentDisplayed();
+                    Assert.assertTrue(contentError, "Không hiển thị lỗi khi thiếu nội dung.");
+                    test.pass(" Hiển thị lỗi đúng khi thiếu nội dung.");
+                    blogPage.closeModal();
+                    break;
+
+                case "missing_image":
+                    boolean imageError = blogPage.isErrorImageDisplayed();
+                    Assert.assertTrue(imageError, "Không hiển thị lỗi khi thiếu hình ảnh.");
+                    test.pass("️ Hiển thị lỗi đúng khi thiếu hình ảnh.");
+                    blogPage.closeModal();
+                    break;
+
+                default:
+                    test.fail(" expectedResult không hợp lệ: " + expectedResult);
+                    Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+            }
+
+        } catch (AssertionError | Exception e) {
+            test.fail("Test thất bại: " + e.getMessage());
+            throw e;
         }
+
+
     }
 
     @Test(dataProvider = "blogEditData", priority = 2)
     public void testEditBlog(String title, String content, String imagePath, String title_edit, String expectedResult) throws InterruptedException {
-        blogPage.searchBlog(title_edit);
-        blogPage.editBlog(title, content, imagePath, true, title_edit);
-        Thread.sleep(1000);
-        switch (expectedResult) {
-            case "success":
-                Assert.assertTrue(blogPage.searchBlog(title), "Blog không hiển thị sau khi cập nhật.");
-                break;
-            case "missing_title":
-                Assert.assertTrue(blogPage.isErrorTitleDisplayed(), "Không hiển thị lỗi khi thiếu tiêu đề.");
-                blogPage.closeModal();
-                break;
-            case "missing_content":
-                Assert.assertTrue(blogPage.isErrorContentDisplayed(), "Không hiển thị lỗi khi thiếu nội dung.");
-                blogPage.closeModal();
-                break;
-            default:
-                Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+        test.info(" Sửa blog từ tiêu đề: " + title_edit + " sang: " + title);
+        try {
+            blogPage.searchBlog(title_edit);
+            blogPage.editBlog(title, content, imagePath, true, title_edit);
+            Thread.sleep(1000);
+
+            switch (expectedResult) {
+                case "success":
+                    Assert.assertTrue(blogPage.searchBlog(title), "Blog không hiển thị sau khi cập nhật.");
+                    test.pass(" Blog cập nhật thành công.");
+                    break;
+
+                case "missing_title":
+                    Assert.assertTrue(blogPage.isErrorTitleDisplayed(), "Không hiển thị lỗi khi thiếu tiêu đề.");
+                    test.pass(" Hiển thị lỗi đúng khi thiếu tiêu đề.");
+                    blogPage.closeModal();
+                    break;
+
+                case "missing_content":
+                    Assert.assertTrue(blogPage.isErrorContentDisplayed(), "Không hiển thị lỗi khi thiếu nội dung.");
+                    test.pass(" Hiển thị lỗi đúng khi thiếu nội dung.");
+                    blogPage.closeModal();
+                    break;
+
+                default:
+                    test.fail(" expectedResult không hợp lệ: " + expectedResult);
+                    Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+            }
+
+        } catch (AssertionError | Exception e) {
+            test.fail("Test thất bại: " + e.getMessage());
+            throw e;
         }
+
+
     }
 
     @Test(dataProvider = "blogDeleteData", priority = 3)
     public void testDeleteBlog(String title, String expectedResult) throws InterruptedException {
-        boolean isFoundBefore = blogPage.searchBlog(title);
-        Thread.sleep(1000);
-        if (isFoundBefore) {
-            blogPage.deteleBlog(title);
+        test.info(" Xoá blog với tiêu đề: " + title);
+
+        try {
+            boolean isFoundBefore = blogPage.searchBlog(title);
             Thread.sleep(1000);
-        }
-        boolean blogStillExists = blogPage.searchBlog(title);
-        switch (expectedResult) {
-            case "success":
-                Assert.assertFalse(blogStillExists, "Blog vẫn hiển thị sau khi xóa.");
-                break;
-            case "not_found":
-                Assert.assertFalse(isFoundBefore, "Không nên tìm thấy blog không tồn tại.");
-                break;
-            default:
-                Assert.fail("Giá trị expectedResult không hợp lệ: " + expectedResult);
-        }
+
+            if (isFoundBefore) {
+                blogPage.deteleBlog(title);
+                test.info(" Đã thực hiện thao tác xoá blog.");
+                Thread.sleep(1000);
+            } else {
+                test.info(" Blog không tồn tại, không cần xoá.");
+            }
+
+            boolean blogStillExists = blogPage.searchBlog(title);
+
+            switch (expectedResult) {
+                case "success":
+                    Assert.assertFalse(blogStillExists, "Blog vẫn hiển thị sau khi xóa.");
+                    test.pass(" Blog đã xoá thành công.");
+                    break;
+
+                case "not_found":
+                    Assert.assertFalse(isFoundBefore, "Không nên tìm thấy blog không tồn tại.");
+                    test.pass(" Blog không tồn tại như mong đợi.");
+                    break;
+
+                default:
+                    test.fail(" expectedResult không hợp lệ: " + expectedResult);
+                    Assert.fail("expectedResult không hợp lệ: " + expectedResult);
+            }
+
+        } catch (AssertionError | Exception e) {
+            test.fail("Test thất bại: " + e.getMessage());
+            throw e;
+        } 
+
     }
 
 //Test Basic

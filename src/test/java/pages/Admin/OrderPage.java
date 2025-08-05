@@ -25,7 +25,7 @@ public class OrderPage extends BasePage {
 
     // Search order & check if found
     public boolean searchOrder(String id) {
-        String idShort = id.substring(1, 9);
+        String idShort = id.substring(0, 8);
         sendKeys(inputSearchOrder, idShort);
         By resultRow = By.xpath("//td/div[contains(normalize-space(), '" + idShort + "')]");
         return isDisplayed(resultRow);
@@ -38,7 +38,7 @@ public class OrderPage extends BasePage {
 
     // Kiểm tra trạng thái đã cập nhật đúng chưa
     public boolean checkStatus(String id, String status) {
-        String idShort =  id.substring(1, 9);
+        String idShort =  id.substring(0, 8);
         By statusCell = By.xpath(String.format("//tr[td/div[text()='%s']]/td/span[text()='%s']", idShort, status));
         return isDisplayed(statusCell);
     }
